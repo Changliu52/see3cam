@@ -88,6 +88,8 @@ namespace uvc_camera {
 			ros::Time last_time;
 			boost::mutex time_mutex_;
 
+			ros::Time imu_capture_time_;  // Chang ADDED!!!!!
+
 			uvc_cam::Cam *cam;
 			boost::thread image_thread;
 			boost::thread IMU_thread;

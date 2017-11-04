@@ -836,7 +836,8 @@ namespace uvc_camera {
 			{
 				cout << "GetIMUValueBuffer failed\n";
 			}
-			//Calculating angles based on the current raw values from IMU			
+			//Calculating angles based on the current raw values from IMU
+			imu_capture_time_ = ros::Time::now();		    // Chang Added!!!!!!!!!!!!!	
 			getInclination(lIMUOutput->gyroX, lIMUOutput->gyroY, lIMUOutput->gyroZ, lIMUOutput->accX, lIMUOutput->accY, lIMUOutput->accZ);
 		}
 	}
@@ -923,7 +924,11 @@ namespace uvc_camera {
 		IMUValue.linear_acceleration.y = ay * 9.80665 / 1000;
 		IMUValue.linear_acceleration.z = az * 9.80665 / 1000;
 		
-		
+		IMUValue.linear_acceleration_covariance[0] = 0.0068; // 100mg@141.5hz
+		IMUValue.linear_acceleration_covariance[4] = IMUValue.linear_acceleration_covariance[0];
+		IMUValue.linear_acceleration_covariance[8] = IMUValue.linear_acceleration_covariance[0];
+
+
 		// To convert acceleration from 'dps' to 'radians/second'
 		
 		gx *= 0.0174533;
@@ -933,6 +938,9 @@ namespace uvc_camera {
 		IMUValue.angular_velocity.x = gx;
 		IMUValue.angular_velocity.y = gy;
 		IMUValue.angular_velocity.z = gz;
+		IMUValue.angular_velocity_covariance[0] = 1.377/1000000000; // 0.008dps@141.5hz
+		IMUValue.angular_velocity_covariance[4] = IMUValue.angular_velocity_covariance[0];
+		IMUValue.angular_velocity_covariance[8] = IMUValue.angular_velocity_covariance[0];
 		
 		// Orientation calculation implemented according to Madgwick
 		// Refer : http://x-io.co.uk/res/doc/madgwick_internal_report.pdf
@@ -1004,6 +1012,8 @@ namespace uvc_camera {
 		IMUValue.orientation.y = q2;
 		IMUValue.orientation.z = q3;
 #endif		
+		IMUValue.header.stamp = imu_capture_time_;
+		IMUValue.header.frame_id = "imu";
 		IMU_pub.publish(IMUValue);		
 	}
 
